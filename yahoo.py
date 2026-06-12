@@ -1,6 +1,7 @@
 import pandas as pd
 import yfinance as yf
 import sqlite3
+import newsAPI
 
 #backtest input tests
 
@@ -25,6 +26,18 @@ query1 = '''CREATE TABLE IF NOT EXISTS ohlcv (
     PRIMARY KEY (Date, Ticker)
     )'''
 
+query2 = '''CREATE TABLE IF NOT EXISTS headlines (
+    Ticker TEXT,
+    Headline TEXT,
+    Source TEXT,
+    Date TEXT,
+    URL TEXT,
+    PRIMARY KEY (URL, Ticker)
+)'''
+
+c.execute(query1)
+c.execute(query2)
+con.commit()
 
 def download (bt_input):
     df = yf.download(
@@ -32,22 +45,17 @@ def download (bt_input):
         start = bt_input['start Date'],
         end = bt_input['end Date'],
         interval = '1d',
-        auto_adjust = False)
-    
-    adj_close = df['Adj Close']
-    high = df['High']
-    low = df['Low']
-    open_price = df['Open']
-    volume = df['Volume']
+        auto_adjust = True)
+
 
     #convert wide to long format
 
     ohlcv = df.stack(level=1).reset_index()
-    ohlcv.columns = ['Date', 'Ticker', 'Close', 'High', 'Low', 'Open', 'Volume', 'Primary Key']
     ohlcv['Date'] = ohlcv['Date'].astype(str)
 
     ohlcv.to_sql('ohlcv', con, if_exists='append', index=False)
     return ohlcv
 
 test = download(bt_input)
+newsAPI.fetch_headlines(bt_input['ticker'], con)
 con.close()
