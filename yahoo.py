@@ -2,6 +2,7 @@ import pandas as pd
 import yfinance as yf
 import sqlite3
 import newsAPI
+import finbert
 
 #backtest input tests
 
@@ -58,4 +59,6 @@ def download (bt_input):
 
 test = download(bt_input)
 newsAPI.fetch_headlines(bt_input['ticker'], con)
+finbert.sentiment_analysis()
 con.close()
+
