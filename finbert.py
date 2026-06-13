@@ -1,8 +1,9 @@
+import os
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
 import pandas as pd
 import sqlite3
 from sqlalchemy import create_engine
 from transformers import pipeline
-import os
 
 
 
