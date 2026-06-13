@@ -33,8 +33,9 @@ def fetch_headlines(tickers, con: sqlite3.Connection):
                 })
         else: 
             print(response['code'])        
-
+            
         df = pd.DataFrame(rows)
-        if not df.empty:
-            df.to_sql('headlines' , con, if_exists='append', index=False)
+        headlines_cleaned = df.dropna(subset=['Headline'])
+        if not headlines_cleaned.empty:
+            headlines_cleaned.to_sql('headlines' , con, if_exists='append', index=False)
 
