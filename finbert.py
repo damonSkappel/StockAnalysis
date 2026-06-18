@@ -1,8 +1,7 @@
 import os
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 import pandas as pd
-import sqlite3
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from transformers import pipeline
 
 
@@ -20,7 +19,27 @@ def sentiment_analysis():
     df_headlines = pd.read_sql(query, con=engine)
 
     if df_headlines.empty:
-        exit()
+        return
+
+    with engine.connect() as connection:
+        connection.execute(text(
+            '''CREATE TABLE IF NOT EXISTS sentiment (
+            headline_ticker TEXT,
+            date TEXT,
+            URL TEXT,
+            sentiment_label TEXT,
+            sentiment_score REAL,
+            PRIMARY KEY (URL, headline_ticker)
+        )'''))
+        connection.commit()
+
+    #This checks to see if the file is empty, if not is skips and nothign happens. Prevents errors
+    if (pd.read_sql("SELECT COUNT(*) FROM sentiment", con=engine).iloc[0,0] != 0):
+        return
+
+#TODO: add the filter of .isin to check if what I am trying to analyize is already in the table. 
+# This would come into play if I added a ticker adn wanted teh sentiment on it as well, 
+# then it wouldn't skip everything and it would add these to the end. 
 
     nlp = pipeline(
         "sentiment-analysis",
