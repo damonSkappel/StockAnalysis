@@ -53,7 +53,7 @@ def fetch_headlines(tickers):
                     'Ticker': ticker,
                     'Headline': article['title'],
                     'Source': article['source']['name'],
-                    'Date': article['publishedAt'],
+                    'Date': article['publishedAt'][0:10], #only takes the first 10 characters so that the date looks the same as the one returned by yfinance. 
                     'URL': article['url']
                 })
         else: 
